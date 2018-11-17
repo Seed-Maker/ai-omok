@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="게임 개발 팀, 시드메이커입니다.">
+
+		<title>Seed Maker - AI Omok</title>
+
+		<script src="//ajax.googleapis.com/ajax/libs/webfont/1.4.10/webfont.js"></script>
+		<script src="/home/assets/js/global/webFont.js"></script>
+
+		<link rel="stylesheet" href="/home/assets/css/global/reset.css">
+		<link rel="stylesheet" href="assets/css/board.css">
+
+		<script async src="/home/assets/js/global/checkBrowser.js"></script>
+		<script src="/api/js/query.js"></script>
+
+		<script src="assets/js/game.js"></script>
+		<script src="assets/js/AI.js"></script>
+		<script src="assets/js/drawBoard.js"></script>
+		<script src="assets/js/select.js"></script>
+	</head>
+	<body>
+		<canvas id="board" width="1000" height="1000"></canvas>
+		<div id="half">
+			<div id="stone-color-select">
+				<p>선공 또는 후공을 선택하십시오.</p>
+				<div id="select-black" class="button">흑돌(선공)</div>
+				<div id="select-white" class="white button">백돌(후공)</div>
+				<br>
+				<P>
+					또는, <a onclick="game.AIvsAI">인공지능끼리 대결시키기.</a>
+				</P>
+			</div>
+			<br>
+			<div class="move button" id="move-up-btn">상</div> <br>
+			<div class="move button" id="move-left-btn">좌</div>
+			<div class="move button" id="set-btn">착</div>
+			<div class="move button" id="move-right-btn">우</div><br>
+			<div class="move button" id="move-down-btn">하</div>
+			<p id="turn-alert">
+				당신의 차례입니다. 착수하십시오.
+			</p>
+			<br>
+			<a onclick="setDisplayHowTo('block');">어떻게 하나요?</a>
+			<p id="how-to-play">
+				키보드의 방향키 또는 위의 버튼으로 포커스 이동,
+				키보드의 스페이스바 또는 엔터 또는 위의 착수 버튼(착)으로 착수합니다.
+				<br>
+				<a onclick="setDisplayHowTo('none');">알겠습니다.</a>
+			</p>
+		</div>
+	</body>
+</html>
