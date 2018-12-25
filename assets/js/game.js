@@ -2,7 +2,7 @@
   게임의 내부적인 작동을 위한 스크립트.
 */
 const game = {
-  version: "v0.1-Beta"
+  version: "v0.1.1-Beta"
 };
 
 //편의를 위해 빈칸은 0, 흰색은 1, 검은색은 2로 취급한다.
@@ -171,16 +171,33 @@ game.getBanedPosition = color => {
       return board[PX] && EMPTY === board[PX][PY];
     }
 
+    //3-3목 금수
     for (k = 0; k < 2; k++)
     for (h = 0; h < 2; h++)
-    for (l = 0; l < 2; l++) {
-      const sign = (-1) ** l;
-      const mapArr = [
-        [-1,-2].concat(Array(2).fill(3).map((e,i) => e + i + k)),
-        [-1,-2].concat(Array(2).fill(3).map((e,i) => e + i + h)).map(e => e * sign),
-        Array(2+k).fill(1).map((e,i) => e + i),
-        Array(2+h).fill(1).map((e,i) => (e + i) * sign)
-      ];
+    for (l = 0; l < 2; l++)
+    for (g = 0; g < 2; g++) {
+      const sign = [ (-1) ** l, (-1) ** g ];
+      const mapArr = ([
+        [-1,-2].concat(
+          Array(2)
+          .fill(3)
+          .map((e,i) => e + i + k)
+        ).map(e => e * sign[0]),
+
+        [-1,-2].concat(
+          Array(2)
+          .fill(3)
+          .map((e,i) => e + i + h)
+        ).map(e => e * sign[1]),
+
+        Array(2+k)
+        .fill(1)
+        .map((e,i) => (e + i) * sign[0]),
+
+        Array(2+h)
+        .fill(1)
+        .map((e,i) => (e + i) * sign[1])
+      ]).map(arr => arr.filter(e => e));
       if (mapArr[0].every(p => blockChecking(0, p))
       &&  mapArr[1].every(p => blockChecking(p, 0))
       &&  mapArr[2].every(p => board[x] && board[x][y+p] === BLACK)
