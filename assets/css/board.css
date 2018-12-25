@@ -8,7 +8,7 @@ body {
   text-align: center;
 }
 
-a[onclick] {
+a {
   cursor: pointer;
   color: #7ad7ff;
   text-decoration: underline;
@@ -59,4 +59,13 @@ a[onclick] {
   width: 30%;
   margin: .5rem;
   border-radius: 1rem;
+}
+
+#version {
+  max-width: 150px;
+  padding: .5rem;
+  margin: auto;
+  border-radius: 1rem;
+  background: #e2e2e2;
+  color: black;
 }

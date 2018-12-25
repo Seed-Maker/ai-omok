@@ -4,8 +4,10 @@ const user = {
     coord: [7, 7],
     set() {
       //user.focus.set
+      const X = 0, Y = 1;
       let board = game.getCanvas(),
           ctx = board.ctx,
+          banedPosition = game.getBanedPosition(user.color),
           x = board.padding + board.blockWidth * user.focus.coord[0],
           y = board.padding + board.blockWidth * user.focus.coord[1],
           r = board.width / 35;
@@ -20,14 +22,39 @@ const user = {
       ctx.moveTo(x, y - board.blockWidth/1.5);
       ctx.lineTo(x, y + board.blockWidth/1.5);
       ctx.stroke();
+
+      if (!game.checkWin())
+      for (i = 0; i < banedPosition.length; i++) {
+        const BX = board.padding + board.blockWidth * banedPosition[i][X],
+              BY = board.padding + board.blockWidth * banedPosition[i][Y],
+              LEN = board.blockWidth/3;
+        ctx.strokeStyle = '#7c1b1b';
+        ctx.lineWidth = 15;
+        ctx.beginPath();
+        ctx.moveTo(BX - LEN, BY - LEN);
+        ctx.lineTo(BX + LEN, BY + LEN);
+        ctx.moveTo(BX - LEN, BY + LEN);
+        ctx.lineTo(BX + LEN, BY - LEN);
+        ctx.stroke();
+      }
     }
   },
 
   set() {
     //user.set
-    const AI_COLOR = (user.color == BLACK)? WHITE : BLACK;
+    const AI_COLOR = (user.color == BLACK)? WHITE : BLACK,
+          X = 0, Y = 1;
 
     if (!user.color || game.stone.isStone(...user.focus.coord)) return;
+
+    const IS_BANED = game.getBanedPosition(user.color)
+                         .map(JSON.stringify)
+                         .includes(
+                           JSON.stringify(user.focus.coord)
+                         );
+
+    if (IS_BANED)
+      return alert("그곳에는 돌을 놓을 수 없습니다. 룰을 확인해주세요.");
 
     game.stone.set(user.color, ...user.focus.coord);
     game.stone.set(AI_COLOR, ...AI(AI_COLOR, game.stone.list));
@@ -46,6 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
   user.focus.set();
 
   $('#set-btn').addEventListener('click', user.set, false);
+  $('#version').innerHTML = game.version;
 
   function initGame(userColor) {
     user.color = userColor;

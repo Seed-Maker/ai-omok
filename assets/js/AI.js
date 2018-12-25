@@ -8,67 +8,68 @@
 
 //오목판의 오목돌들이 정의된 2차원 배열을 인자로 필요로 한다.
 function AI(color, blocks) {
-  //편의를 위해 빈칸은 0, 흰색은 1, 검은색은 2로 취급한다.
-  const EMPTY = 0,
-        WHITE = 1,
-        BLACK = 2;
+  const X = 0, Y = 1;
 
   let blockAmount = 0,
       priority = [],
       max = -Infinity,
       maxCoords = [],
-      i, j;
+      x, y;
 
   //15*15인 2차원 배열을 생성한다.
-  for (i = 0; i < 15; i++) {
-    priority[i] = [];
-    for (j = 0; j < 15; j++)
-      priority[i][j] = 0;
+  for (x = 0; x < 15; x++) {
+    priority[x] = [];
+    for (y = 0; y < 15; y++)
+      priority[x][y] = 0;
   }
 
-  //이미 돌이 놓인 곳의 우선도를 3000만큼 낮춘다.
-  for (j = 0; j < 15; j++)
-    for (i = 0; i < 15; i++)
-      if (blocks[i][j]) {
-        blockAmount++;
-        priority[i][j] -= 3000;
-      }
+  //이미 돌이 놓인 곳의 우선도를 음의 무한대로 한다.
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++)
+    if (blocks[x][y]) {
+      blockAmount++;
+      priority[x][y] = -Infinity;
+    }
 
   if (blockAmount >= 15 * 15) {
     alert("오목판이 모두 차서 AI가 선택할 수 없습니다.");
     throw new Error("Block exceeded");
   }
 
+  //금수인 지점의 우선도를 음의 무한대로 한다.
+  game.getBanedPosition(color).forEach(banedCoord => {
+    const BX = banedCoord[X],
+          BY = banedCoord[Y];
+    priority[BX][BY] = -Infinity;
+  });
+
   //놓인 돌이 없거나 1개이면 바둑판 중앙의 우선도를 1000만큼 높힌다.
   if (blockAmount < 2)
     priority[7][7] += 1000;
 
   //모든 돌의 8방향에 우선도를 1만큼 높힌다.
-  for (i = 0; i < 15; i++) {
-    for (j = 0; j < 15; j++) {
-      if (blocks[i][j]) {
-        if (i) priority[i - 1][j]++;
-        if (i != 14) priority[i + 1][j]++;
-        if (j) priority[i][j - 1]++;
-        if (j != 14) priority[i][j + 1]++;
-        if (i * j) priority[i - 1][j - 1]++;
-        if (i != 14 && j) priority[i + 1][j - 1]++;
-        if (i && j != 14) priority[i - 1][j + 1]++;
-        if (i != 14 && j != 14) priority[i + 1][j + 1]++;
-      }
-    }
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++) {
+    if (!blocks[x][y]) continue;
+    if (x) priority[x - 1][y]++;
+    if (x != 14) priority[x + 1][y]++;
+    if (y) priority[x][y - 1]++;
+    if (y != 14) priority[x][y + 1]++;
+    if (x * y) priority[x - 1][y - 1]++;
+    if (x != 14 && y) priority[x + 1][y - 1]++;
+    if (x && y != 14) priority[x - 1][y + 1]++;
+    if (x != 14 && y != 14) priority[x + 1][y + 1]++;
   }
 
   //우선도가 가장 높은 것들을 찾고, 그중 하나를 무작위로 선택, 반환한다.
-  for (j = 0; j < 15; j++) {
-    for (i = 0; i < 15; i++) {
-      if (max < priority[i][j]) {
-        max = priority[i][j];
-        maxCoords.length = 0;
-      }
-      if (max <= priority[i][j]) {
-        maxCoords.push([i,j]);
-      }
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++) {
+    if (max < priority[x][y]) {
+      max = priority[x][y];
+      maxCoords.length = 0;
+    }
+    if (max <= priority[x][y]) {
+      maxCoords.push([x,y]);
     }
   }
 
