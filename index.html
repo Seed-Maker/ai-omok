@@ -12,10 +12,10 @@
 
 		<link rel="stylesheet" href="/home/assets/css/global/reset.css">
 		<link rel="stylesheet" href="assets/css/board.css">
+		<link rel="stylesheet" href="assets/css/button.css">
 
-		<script async src="/home/assets/js/global/checkBrowser.js"></script>
-		<script src="/api/js/query.js"></script>
-
+		<script src="/api/js/min/query.min.js"></script>
+		<script src="/api/js/checkES8.js"></script>
 		<script src="assets/js/game.js"></script>
 		<script src="assets/js/AI.js"></script>
 		<script src="assets/js/drawBoard.js"></script>
@@ -28,28 +28,30 @@
 				<p>선공 또는 후공을 선택하십시오.</p>
 				<div id="select-black" class="button">흑돌(선공)</div>
 				<div id="select-white" class="white button">백돌(후공)</div>
-				<br>
-				<P>
-					또는, <a onclick="game.AIvsAI()">인공지능끼리 대결시키기.</a>
-				</P>
 			</div>
 			<br>
-			<div class="move button" id="move-up-btn">상</div> <br>
-			<div class="move button" id="move-left-btn">좌</div>
-			<div class="move button" id="set-btn">착</div>
-			<div class="move button" id="move-right-btn">우</div><br>
-			<div class="move button" id="move-down-btn">하</div>
-			<p id="turn-alert">
-				당신의 차례입니다. 착수하십시오.
+			<div id="control-keys">
+				<div class="fake move button"></div>
+				<div class="move button" id="move-up-btn"></div>
+				<div class="fake move button"></div>
+				<div class="move button" id="move-left-btn"></div>
+				<div class="move button" id="set-btn"></div>
+				<div class="move button" id="move-right-btn"></div>
+				<div class="fake move button"></div>
+				<div class="move button" id="move-down-btn"></div>
+				<div class="fake move button"></div>
+			</div>
+			<p id="game-explain">
+				위의 버튼 또는 키보드의 방향키와 엔터를 이용해 조작하세요!
 			</p>
-			<br>
-			<a onclick="setDisplayHowTo('block');">어떻게 하나요?</a>
-			<p id="how-to-play">
-				키보드의 방향키 또는 위의 버튼으로 포커스 이동,
-				키보드의 스페이스바 또는 엔터 또는 위의 착수 버튼(착)으로 착수합니다.
-				<br>
-				<a onclick="setDisplayHowTo('none');">알겠습니다.</a>
-			</p>
+			<div id="icons">
+				<img
+					src="/home/img/iOS/icon.png"
+					alt="seed maker"
+					onclick="window.open('https://seed-maker.github.io/home/game/ai-omok', '_blank')">
+			</div>
 		</div>
+
+		<br><br><br><br><br><br>
 	</body>
 </html>

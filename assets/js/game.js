@@ -1,7 +1,7 @@
 /*
   게임의 내부적인 작동을 위한 스크립트.
 */
-var game = {};
+const game = {};
 
 //편의를 위해 빈칸은 0, 흰색은 1, 검은색은 2로 취급한다.
 const EMPTY = 0,
@@ -10,7 +10,7 @@ const EMPTY = 0,
 
 //캔버스 요소를 사용하기 편한 형태로 리턴하는 함수.
 game.getCanvas = function () {
-  let board = document.getElementById('board');
+  let board = $('#board');
   if (!board) return {elem:null};
   return {
     elem: board,
@@ -56,7 +56,7 @@ game.stone.update = function () {
       color,
       x, y;
 
-  game.drawBoard();/*drawBoard함수는 drawBoard.js에서 정의된다.*/
+  game.drawBoard();
   for (let i = 0; i < 15; i++) {
     for (let j = 0; j < 15; j++) {
       if (!game.stone.list[i][j]) continue;
@@ -98,7 +98,7 @@ game.checkWin = function () {
       for (l = -1; l < 2; l++) {
         color = game.stone.list[x][y];
         for (k = 0; k < 5; k++) {
-          if (!game.stone.list[x+k] || color != game.stone.list[x+k][y+k*l]) {
+          if (!game.stone.list[x+k] || color !== game.stone.list[x+k][y+k*l]) {
             color = EMPTY;
             break;
           }
@@ -107,7 +107,7 @@ game.checkWin = function () {
       }
       color = game.stone.list[x][y];
       for (k = 0; k < 5; k++) {
-        if (color != game.stone.list[x][y+k]) {
+        if (color !== game.stone.list[x][y+k]) {
           color = EMPTY;
           break;
         }
@@ -117,6 +117,21 @@ game.checkWin = function () {
   }
 
   return EMPTY;
+}
+
+//금수 목록을 얻는 함수.
+game.getBanedPosition = color => {
+  const result = [],
+        board = game.stone.list;
+  let x, y, k, l, nowColor;
+
+  if (!color || color !== BLACK) return result;
+
+  for (x = 1; x < 13; x++)
+  for (y = 1; y < 13; y++)
+  for (l = -1; l = 2; i++) {
+
+  }
 }
 
 //AI의 테스트를 위해, AI vs AI 대결을 시키는 함수.

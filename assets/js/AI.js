@@ -34,6 +34,11 @@ function AI(color, blocks) {
         priority[i][j] -= 3000;
       }
 
+  if (blockAmount >= 15 * 15) {
+    alert("오목판이 모두 차서 AI가 선택할 수 없습니다.");
+    throw new Error("Block exceeded");
+  }
+
   //놓인 돌이 없거나 1개이면 바둑판 중앙의 우선도를 1000만큼 높힌다.
   if (blockAmount < 2)
     priority[7][7] += 1000;
