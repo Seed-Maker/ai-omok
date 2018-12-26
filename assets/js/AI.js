@@ -62,9 +62,31 @@ function AI(color, blocks) {
     if (x != 14 && y != 14) priority[x + 1][y + 1]++;
   }
 
+  //공격 가능한 2목을 방어 또는 공격한다.
+  //양 끝 수의 우선도를 올린다.
+  //상대의 돌일 경우 8, 자신의 돌일 경우 10.
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++) {
+    if (!blocks[x][y]) continue;
+    nowColor = blocks[x][y];
+    for (t = -1; t < 2; t++)
+    for (s = -1; s < 2; s++) {
+      if (
+        (t || s) && [-1,-2,2,3,4].every(e => {
+          const PX = x + e * t,
+                PY = y + e * s;
+          return game.stone.is(EMPTY, PX, PY);
+        }) && game.stone.is( nowColor, x +  t, y + s )
+      ) {
+        const p = (color !== nowColor)? 8 : 10;
+        priority[x + 2 * t][y + 2 * s] += p;
+      }
+    }
+  }
+
   //3목을 방어 또는 공격한다.
   //유효한 3목의 양 끝 수의 우선도를 올린다.
-  //상대의 돌 일 경우 35, 자신의 돌 일 경우 30.
+  //상대의 돌일 경우 35, 자신의 돌일 경우 30.
   for (x = 0; x < 15; x++)
   for (y = 0; y < 15; y++) {
     if (!blocks[x][y]) continue;
@@ -119,11 +141,8 @@ function AI(color, blocks) {
     ) {
       const p = (color !== nowColor)? 1500 : 2000;
       [
-        [
-          x + 4 * t, y + 4 * s
-        ], [
-          x - 1 * t, y - 1 * s
-        ]
+        [ x + 4 * t, y + 4 * s ],
+        [ x - 1 * t, y - 1 * s ]
       ].forEach(point => {
         const PX = point[X],
               PY = point[Y];
