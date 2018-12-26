@@ -14,7 +14,8 @@ function AI(color, blocks) {
       priority = [],
       max = -Infinity,
       maxCoords = [],
-      x, y;
+      x, y, t, s,
+      nowColor;
 
   //15*15인 2차원 배열을 생성한다.
   for (x = 0; x < 15; x++) {
@@ -59,6 +60,77 @@ function AI(color, blocks) {
     if (x != 14 && y) priority[x + 1][y - 1]++;
     if (x && y != 14) priority[x - 1][y + 1]++;
     if (x != 14 && y != 14) priority[x + 1][y + 1]++;
+  }
+
+  //3목을 방어 또는 공격한다.
+  //유효한 3목의 양 끝 수의 우선도를 올린다.
+  //상대의 돌 일 경우 35, 자신의 돌 일 경우 30.
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++) {
+    if (!blocks[x][y]) continue;
+    nowColor = blocks[x][y];
+    [
+      [ 1, -1 ],
+      [ 1,  1 ],
+      [ 1,  0 ],
+      [ 0,  1 ],
+    ].forEach(arr => {
+      if (
+        [1,2].every(e => {
+          const PX = x + e * arr[0],
+                PY = y + e * arr[1];
+          return game.stone.is(nowColor, PX, PY, blocks);
+        }) && [-1,-2,3,4].every(e => {
+          const PX = x + e * arr[0],
+                PY = y + e * arr[1];
+          return !game.stone.isStone(PX, PY)
+                && blocks[PX]
+                && blocks[PX][PY] === EMPTY;
+        })
+      ) {
+        const p = (color !== nowColor)? 30 : 35;
+        priority[x - arr[0]][y - arr[1]] += p;
+        priority[x + 3 * arr[0]][y + 3 * arr[1]] += p;
+      }
+    });
+  }
+
+  //승리 확정수를 방어 또는 공격한다.
+  //해당 수의 우선도를 상대일 경우 1500,
+  //자신일 경우 2000 만큼 올린다.
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++)
+  for (t = -1; t < 2; t++)
+  for (s = -1; s < 2; s++) {
+    if (!blocks[x][y] || !(t || s)) continue;
+    nowColor = blocks[x][y];
+    if (
+      [-1,4].some(e => {
+        const PX = x + e * t,
+              PY = y + e * s;
+        return !game.stone.isStone(PX, PY)
+              && blocks[PX]
+              && blocks[PX][PY] === EMPTY;
+      }) && [1,2,3].every(e => {
+        const PX = x + e * t,
+              PY = y + e * s;
+        return game.stone.is(nowColor, PX, PY);
+      })
+    ) {
+      const p = (color !== nowColor)? 1500 : 2000;
+      [
+        [
+          x + 4 * t, y + 4 * s
+        ], [
+          x - 1 * t, y - 1 * s
+        ]
+      ].forEach(point => {
+        const PX = point[X],
+              PY = point[Y];
+        if (blocks[PX])
+          priority[PX][PY] += p;
+      });
+    }
   }
 
   //우선도가 가장 높은 것들을 찾고, 그중 하나를 무작위로 선택, 반환한다.

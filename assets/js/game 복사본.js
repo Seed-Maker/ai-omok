@@ -2,7 +2,7 @@
   게임의 내부적인 작동을 위한 스크립트.
 */
 const game = {
-  version: "v0.2-Beta"
+  version: "v0.1.1-Beta"
 };
 
 //편의를 위해 빈칸은 0, 흰색은 1, 검은색은 2로 취급한다.
@@ -83,15 +83,9 @@ game.stone.update = () => {
 }
 
 //x,y 좌표에 돌이 존재하는지 불리언값으로 리턴하는 함수.
-game.stone.isStone = (x, y, board) => {
-  board = board || game.stone.list;
+game.stone.isStone = (x, y) => {
+  const board = game.stone.list;
   return board[x] && board[x][y];
-}
-
-//x,y 좌표에 돌의 색이 매칭되는지 확인.
-game.stone.is = (color, x, y, board) => {
-  board = board || game.stone.list;
-  return board[x] && board[x][y] === color;
 }
 
 //해당 시점에 승리한 돌의 색을 리턴. 없으면 EMPTY리턴하는 함수.
@@ -125,10 +119,11 @@ game.checkWin = () => {
 
 //금수 목록을 얻는 함수.
 game.getBanedPosition = color => {
-  const board = game.stone.list,
+  const result = [],
+        board = game.stone.list,
         X = 0, Y = 1;
   var x, y, k, h, l, g, t, s, q, u, c,
-      nowColor, result = [];
+      nowColor;
 
   if (!color || color !== BLACK) return result;
 
@@ -166,65 +161,141 @@ game.getBanedPosition = color => {
     }
   });
 
-  //흑돌 3-3, 4-4 금수
+  //흑돌 3-3, 3-4, 4-4 금수
   if (color === BLACK)
   for (x = 1; x < 13; x++)
   for (y = 1; y < 13; y++) {
-    const copiedBoard = JSON.parse(
-            JSON.stringify(board)
-          );
-    let score = Array(15).fill().map(
-          () => Array(15).fill(0)
-        );
+    let isBaned = false;
 
-    function reflectAndUpdate() {
-      score.forEach((col, ax) => {
-        col.forEach((item, ay) => {
-          if (!board[ax][ay] && item > 1)
-            result.push([ax,ay]);
-        });
-        col.fill(0);
-      });
+    if (board[x][y] !== EMPTY) continue;
+    function blockChecking(dx, dy) {
+      const PX = x + dx,
+            PY = y + dy;
+      return board[PX] && EMPTY === board[PX][PY];
     }
 
-    copiedBoard[x][y] = BLACK;
-
-    for (k = 0; k < 15; k++)
-    for (h = 0; h < 15; h++) {
-      [
-        [ 1, -1 ],
-        [ 1,  1 ],
-        [ 1,  0 ],
-        [ 0,  1 ],
-      ].forEach(arr => {
-        if (
-          [1,2,3].every(e => {
-            const PX = k + e * arr[0],
-                  PY = h + e * arr[1];
-            return game.stone.is(BLACK, PX, PY, copiedBoard);
-          }) && [-1,-2,4].every(e => {
-            const PX = k + e * arr[0],
-                  PY = h + e * arr[1];
-            return !game.stone.isStone(PX, PY, copiedBoard)
-                  && copiedBoard[PX]
-                  && copiedBoard[PX][PY] === EMPTY;
-          })
-        ) [1,2,3].forEach(e => {
-          const PX = k + e * arr[0],
-                PY = h + e * arr[1];
-          score[PX][PY]++;
-        });
-      });
+    function checkIsBlack(x, y) {
+      return board[x] && board[x][y] === BLACK;
     }
 
-    reflectAndUpdate();
-
-    for (k = 1; k < 15; k++)
-    for (h = 1; h < 15; h++) {
-
+    //3-3, 4-4 금수
+    for (l = 0; l < 2; l++)
+    for (g = 0; g < 2; g++)
+    for (t = 0; t < 2; t++) {
+      const sign = [l,g].map(e => (-1) ** e);
+      const mapArr = [
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ 1, 2 ].concat(Array(t).fill(3)),
+        [ 1, 2 ].concat(Array(t).fill(3))
+      ].map((arr, i) => arr.map(e => e * sign[i%2])
+                           .filter(e => e));
+      if (mapArr[0].every(p => blockChecking(0, p))
+      &&  mapArr[1].every(p => blockChecking(p, 0))
+      &&  mapArr[2].every(p => checkIsBlack(x, y + p))
+      &&  mapArr[3].every(p => checkIsBlack(x + p, y))
+      ) {
+        result.push([x,y]);
+        isBaned = true;
+        break;
+      }
     }
 
-    reflectAndUpdate();
+    if (isBaned) continue;
+
+    //3-3, 4-4 금수
+    for (l = 0; l < 2; l++)
+    for (g = 0; g < 2; g++)
+    for (t = 0; t < 2; t++) {
+      const sign = [l,g].map(e => (-1) ** e);
+      const mapArr = [
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ 1, 2 ].concat(Array(t).fill(3)),
+        [ 1, 2 ].concat(Array(t).fill(3))
+      ].map((arr, i) => arr.map(e => e * sign[i%2])
+                           .filter(e => e));
+      if (mapArr[0].every(p => blockChecking(p, p))
+      &&  mapArr[1].every(p => blockChecking(p, 0))
+      &&  mapArr[2].every(p => checkIsBlack(x, y + p))
+      &&  mapArr[3].every(p => checkIsBlack(x + p, y))
+      ) {
+        result.push([x,y]);
+        isBaned = true;
+        break;
+      }
+    }
+
+    //3-3, 4-4 금수
+    for (l = 0; l < 2; l++)
+    for (g = 0; g < 2; g++)
+    for (t = 0; t < 2; t++) {
+      const sign = [l,g].map(e => (-1) ** e);
+      const mapArr = [
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ 1, 2 ].concat(Array(t).fill(3)),
+        [ 1, 2 ].concat(Array(t).fill(3))
+      ].map((arr, i) => arr.map(e => e * sign[i%2])
+                           .filter(e => e));
+      if (mapArr[0].every(p => blockChecking(-p, 0))
+      &&  mapArr[1].every(p => blockChecking(p, p))
+      &&  mapArr[2].every(p => checkIsBlack(x - p, y))
+      &&  mapArr[3].every(p => checkIsBlack(x + p, y + p))
+      ) {
+        result.push([x,y]);
+        isBaned = true;
+        break;
+      }
+    }
+
+      //3-3, 4-4 금수
+      for (l = 0; l < 2; l++)
+      for (g = 0; g < 2; g++)
+      for (t = 0; t < 2; t++) {
+        const sign = [l,g].map(e => (-1) ** e);
+        const mapArr = [
+          [ -1, -2 ].concat([3, 4].map(e => e + t)),
+          [ -1, -2 ].concat([3, 4].map(e => e + t)),
+          [ 1, 2 ].concat(Array(t).fill(3)),
+          [ 1, 2 ].concat(Array(t).fill(3))
+        ].map((arr, i) => arr.map(e => e * sign[i%2])
+                             .filter(e => e));
+        if (mapArr[0].every(p => blockChecking(0, -p))
+        &&  mapArr[1].every(p => blockChecking(p, p))
+        &&  mapArr[2].every(p => checkIsBlack(x, y - p))
+        &&  mapArr[3].every(p => checkIsBlack(x + p, y + p))
+        ) {
+          result.push([x,y]);
+          isBaned = true;
+          break;
+        }
+    }
+
+    //3-3, 4-4 금수
+    for (l = 0; l < 2; l++)
+    for (g = 0; g < 2; g++)
+    for (t = 0; t < 2; t++) {
+      const sign = [l,g].map(e => (-1) ** e);
+      const mapArr = [
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ -1, -2 ].concat([3, 4].map(e => e + t)),
+        [ 1, 2 ].concat(Array(t).fill(3)),
+        [ 1, 2 ].concat(Array(t).fill(3))
+      ].map((arr, i) => arr.map(e => e * sign[i%2])
+                           .filter(e => e));
+      if (mapArr[0].every(p => blockChecking(0, -p))
+      &&  mapArr[1].every(p => blockChecking(-p, p))
+      &&  mapArr[2].every(p => checkIsBlack(x, y - p))
+      &&  mapArr[3].every(p => checkIsBlack(x - p, y + p))
+      ) {
+        result.push([x,y]);
+        isBaned = true;
+        break;
+      }
+  }
+
+    // if (isBaned) continue;
   }
 
   return result;
