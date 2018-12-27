@@ -104,7 +104,7 @@ function AI(color, blocks) {
                   PY = y + e * arr[1];
             return game.stone.is(nowColor, PX, PY, blocks);
           }),
-          p2 = [-1,-2,3,4].every(e => {
+          q2 = [-1,-2,3,4].every(e => {
             const PX = x + e * arr[0],
                   PY = y + e * arr[1];
             return !game.stone.isStone(PX, PY)
