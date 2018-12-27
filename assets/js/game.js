@@ -2,7 +2,7 @@
   게임의 내부적인 작동을 위한 스크립트.
 */
 const game = {
-  version: "v0.3-Beta"
+  version: "v0.4-Beta"
 };
 
 //편의를 위해 빈칸은 0, 흰색은 1, 검은색은 2로 취급한다.
@@ -125,7 +125,7 @@ game.checkWin = () => {
 game.getBanedPosition = color => {
   const board = game.stone.list,
         X = 0, Y = 1;
-  var x, y, k, h, l, g, t, s, q, u, c,
+  var x, y, k, h, l, g, t, s,
       nowColor, result = [];
 
   if (!color || color !== BLACK) return result;
@@ -165,64 +165,66 @@ game.getBanedPosition = color => {
   });
 
   //흑돌 3-3, 4-4 금수
-  if (color === BLACK)
-  for (x = 1; x < 13; x++)
-  for (y = 1; y < 13; y++) {
-    const copiedBoard = JSON.parse(
-            JSON.stringify(board)
-          );
+  if (color === BLACK) {
     let score = Array(15).fill().map(
-          () => Array(15).fill(0)
-        );
+      () => Array(15).fill(0)
+    );
 
     function reflectAndUpdate() {
       score.forEach((col, ax) => {
         col.forEach((item, ay) => {
-          if (!board[ax][ay] && item > 1)
+          if (!board[ax][ay] && item > 1){
             result.push([ax,ay]);
+          }
         });
         col.fill(0);
       });
     }
 
-    copiedBoard[x][y] = BLACK;
+    for (x = 1; x < 13; x++)
+    for (y = 1; y < 13; y++) {
+      for (s = 0; s < 2; s++) {
+        const copiedBoard = JSON.parse(
+                JSON.stringify(board)
+              ),
+              target = {
+                black: [0, 1, 2].concat(Array(s).fill(3)),
+                empty: [-1,-2,3,4].concat(Array(s).fill(5))
+              };
 
-    for (k = 0; k < 15; k++)
-    for (h = 0; h < 15; h++) {
-      [
-        [ 1, -1 ],
-        [ 1,  1 ],
-        [ 1,  0 ],
-        [ 0,  1 ],
-      ].forEach(arr => {
-        if (
-          [1,2,3].every(e => {
-            const PX = k + e * arr[0],
-                  PY = h + e * arr[1];
-            return game.stone.is(BLACK, PX, PY, copiedBoard);
-          }) && [-1,-2,4].every(e => {
-            const PX = k + e * arr[0],
-                  PY = h + e * arr[1];
-            return !game.stone.isStone(PX, PY, copiedBoard)
-                  && copiedBoard[PX]
-                  && copiedBoard[PX][PY] === EMPTY;
-          })
-        ) [1,2,3].forEach(e => {
-          const PX = k + e * arr[0],
-                PY = h + e * arr[1];
-          score[PX][PY]++;
-        });
-      });
+        copiedBoard[x][y] = BLACK;
+
+        for (k = -1; k < 2; k++)
+        for (h = 0; h < 2; h++) {
+          if (
+            (k || h) && target.black.every(e =>
+              game.stone.is(
+                BLACK,
+                x + e * k,
+                y + e * h,
+                copiedBoard
+              )
+            ) && target.empty.every(e =>
+              game.stone.is(
+                EMPTY,
+                x + e * k,
+                y + e * h,
+                copiedBoard
+              )
+            )
+          ) target.black.forEach(e => {
+            for (g = 0; g < 2; g++) {
+              const PX = x + (e + g) * k,
+                    PY = y + (e + g) * h;
+              score[PX][PY]++;
+              console.log(PX, PY);
+            }
+          });
+        }
+      }
+
+      reflectAndUpdate();
     }
-
-    reflectAndUpdate();
-
-    for (k = 1; k < 15; k++)
-    for (h = 1; h < 15; h++) {
-
-    }
-
-    reflectAndUpdate();
   }
 
   return result;

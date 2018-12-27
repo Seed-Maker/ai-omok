@@ -86,31 +86,35 @@ function AI(color, blocks) {
 
   //3목을 방어 또는 공격한다.
   //유효한 3목의 양 끝 수의 우선도를 올린다.
-  //상대의 돌일 경우 35, 자신의 돌일 경우 30.
+  //유효하지 않는 자신의 3목 양쪽의 우선도를 5만큼 올린다.
+  //유효한 상대의 돌일 경우 35, 자신의 돌일 경우 30.
   for (x = 0; x < 15; x++)
   for (y = 0; y < 15; y++) {
     if (!blocks[x][y]) continue;
     nowColor = blocks[x][y];
     [
       [ 1, -1 ],
+      [-1,  1 ],
       [ 1,  1 ],
       [ 1,  0 ],
       [ 0,  1 ],
     ].forEach(arr => {
-      if (
-        [1,2].every(e => {
-          const PX = x + e * arr[0],
-                PY = y + e * arr[1];
-          return game.stone.is(nowColor, PX, PY, blocks);
-        }) && [-1,-2,3,4].every(e => {
-          const PX = x + e * arr[0],
-                PY = y + e * arr[1];
-          return !game.stone.isStone(PX, PY)
-                && blocks[PX]
-                && blocks[PX][PY] === EMPTY;
-        })
-      ) {
-        const p = (color !== nowColor)? 30 : 35;
+      let q1 = [1,2].every(e => {
+            const PX = x + e * arr[0],
+                  PY = y + e * arr[1];
+            return game.stone.is(nowColor, PX, PY, blocks);
+          }),
+          p2 = [-1,-2,3,4].every(e => {
+            const PX = x + e * arr[0],
+                  PY = y + e * arr[1];
+            return !game.stone.isStone(PX, PY)
+                  && blocks[PX]
+                  && blocks[PX][PY] === EMPTY;
+          });
+
+      if (q1 && q2) {
+        const p = q2 ? (nowColor === color? 35 : 30)
+                     : (nowColor === color? 5  :  0);
         priority[x - arr[0]][y - arr[1]] += p;
         priority[x + 3 * arr[0]][y + 3 * arr[1]] += p;
       }
@@ -120,6 +124,7 @@ function AI(color, blocks) {
   //승리 확정수를 방어 또는 공격한다.
   //해당 수의 우선도를 상대일 경우 1500,
   //자신일 경우 2000 만큼 올린다.
+  //승리 확정수 방어 1
   for (x = 0; x < 15; x++)
   for (y = 0; y < 15; y++)
   for (t = -1; t < 2; t++)
@@ -151,6 +156,45 @@ function AI(color, blocks) {
       });
     }
   }
+
+  //승리 확정수 방어2
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++) {
+    if (!blocks[x][y]) continue;
+    nowColor = blocks[x][y];
+    [
+      [1,-1],
+      [1, 0],
+      [1, 1],
+      [0, 1]
+    ].forEach(arr => {
+      const DX = arr[0],
+            DY = arr[1];
+      let emptyCount = 0,
+          emptyCoord = [-1,-1];
+      for (t = 1; t < 4; t++) {
+        const PX = x + t * DX,
+              PY = y + t * DY;
+        if (game.stone.is(EMPTY, PX, PY)) {
+          emptyCount++;
+          emptyCoord = [PX, PY];
+          continue;
+        }
+        if (emptyCount > 1) break;
+        if (!game.stone.is(nowColor, PX, PY)) {
+          emptyCount = Infinity;
+          break;
+        }
+      }
+      if (emptyCount === 1) {
+        const PX = emptyCoord[X],
+              PY = emptyCoord[Y],
+              p = (color !== nowColor)? 1500 : 2000;
+        priority[PX][PY] += p;
+      }
+    });
+  }
+
 
   //우선도가 가장 높은 것들을 찾고, 그중 하나를 무작위로 선택, 반환한다.
   for (x = 0; x < 15; x++)
