@@ -50,16 +50,14 @@ function AI(color, blocks) {
 
   //모든 돌의 8방향에 우선도를 1만큼 높힌다.
   for (x = 0; x < 15; x++)
-  for (y = 0; y < 15; y++) {
-    if (!blocks[x][y]) continue;
-    if (x) priority[x - 1][y]++;
-    if (x != 14) priority[x + 1][y]++;
-    if (y) priority[x][y - 1]++;
-    if (y != 14) priority[x][y + 1]++;
-    if (x * y) priority[x - 1][y - 1]++;
-    if (x != 14 && y) priority[x + 1][y - 1]++;
-    if (x && y != 14) priority[x - 1][y + 1]++;
-    if (x != 14 && y != 14) priority[x + 1][y + 1]++;
+  for (y = 0; y < 15; y++)
+  if (blocks[x][y])
+  for (t = -1; t < 2; t++)
+  for (s = -1; s < 2; s++) {
+    const PX = x + t,
+          PY = y + s;
+    if (game.stone.is(EMPTY, PX, PY))
+      priority[PX][PY]++;
   }
 
   //공격 가능한 2목을 방어 또는 공격한다.

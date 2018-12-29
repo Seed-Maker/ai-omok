@@ -2,7 +2,7 @@
   게임의 내부적인 작동을 위한 스크립트.
 */
 const game = {
-  version: "v0.4.1-Beta"
+  version: "v0.4.2-Beta"
 };
 
 //편의를 위해 빈칸은 0, 흰색은 1, 검은색은 2로 취급한다.
@@ -12,8 +12,8 @@ const EMPTY = 0,
 
 //캔버스 요소를 사용하기 편한 형태로 리턴하는 함수.
 game.getCanvas = () => {
-  let board = $('#board');
-  if (!board) return {elem:null};
+  const board = $('#board');
+  if (!board) return { elem: null };
   return {
     elem: board,
     ctx: board.getContext('2d'),
@@ -50,33 +50,32 @@ game.stone.set = (color, x, y) => {
 
 //저장된 바둑돌에 위치에 따라 캔버스를 다시 그려내는 함수.
 game.stone.update = () => {
-  let board = game.getCanvas(),
-      ctx = board.ctx,
-      r = board.width / 35,
-      color,
-      x, y;
+  const board = game.stone.list,
+        display = game.getCanvas(),
+        ctx = display.ctx,
+        r = display.width / 35;
+  let color, x, y;
 
   game.drawBoard();
-  for (let i = 0; i < 15; i++) {
-    for (let j = 0; j < 15; j++) {
-      if (!game.stone.list[i][j]) continue;
+  for (let i = 0; i < 15; i++)
+  for (let j = 0; j < 15; j++) {
+    if (!board[i][j]) continue;
 
-      color = game.stone.list[i][j];
+    color = board[i][j];
 
-      x = board.padding + board.blockWidth * i;
-      y = board.padding + board.blockWidth * j;
+    x = display.padding + display.blockWidth * i;
+    y = display.padding + display.blockWidth * j;
 
-      ctx.fillStyle = (color == WHITE)? "white" : "black";
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.fill();
+    ctx.fillStyle = (color == WHITE)? "white" : "black";
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fill();
 
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#808080';
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#808080';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.stroke();
   }
 }
 
@@ -98,24 +97,23 @@ game.checkWin = () => {
     모든 돌 (stone.list[x][y])의 색이 x 축 또는 y 축 또는 대각선으로
     같은 색 5개가 동일하게 놓여있다면 승리다.
   */
+  const board = game.stone.list;
   let color, x, y, k, h, l;
-  for (x = 0; x < 15; x++) {
-    for (y = 0; y < 15; y++) {
-      if (!game.stone.list[x][y]) continue;
-      for (h = 0; h < 2; h++)
-      for (l = -1; l < 2; l++) {
-        color = game.stone.list[x][y];
-        for (k = 0; k < 5; k++) {
-          const PX = x + k * h,
-                PY = y + k * l ** h;
-          if (!game.stone.list[PX] || color !== game.stone.list[PX][PY]) {
-            color = EMPTY;
-            break;
-          }
-        }
-        if (color) return color;
+  for (x = 0; x < 15; x++)
+  for (y = 0; y < 15; y++)
+  if (board[x][y])
+  for (h = 0; h < 2; h++)
+  for (l = -1; l < 2; l++) {
+    color = board[x][y];
+    for (k = 0; k < 5; k++) {
+      const PX = x + k * h,
+            PY = y + k * (l ** h);
+      if (!board[PX] || color !== board[PX][PY]) {
+        color = EMPTY;
+        break;
       }
     }
+    if (color) return color;
   }
 
   return EMPTY;
@@ -125,7 +123,7 @@ game.checkWin = () => {
 game.getBanedPosition = color => {
   const board = game.stone.list,
         X = 0, Y = 1;
-  var x, y, k, h, l, g, t, s,
+  let x, y, k, h, l, g, t, s,
       nowColor, result = [];
 
   if (!color || color !== BLACK) return result;
@@ -141,7 +139,7 @@ game.getBanedPosition = color => {
     for (l = -1; l < 2; l++) {
       let emptyCount = 0,
           emptyCoords = [-1, -1];
-      if (board[x][y] !== BLACK) break;
+      if (board[x][y] === BLACK)
       for (k = 0; k < n; k++) {
         const PX = x + k * h,
               PY = y + k * (l ** h);
@@ -153,7 +151,7 @@ game.getBanedPosition = color => {
           emptyCount = -1;
           break;
         }
-        if (board[PX][PY] === EMPTY) {
+        if (game.stone.is(EMPTY, PX, PY)) {
           emptyCount++;
           emptyCoords[X] = PX;
           emptyCoords[Y] = PY;
@@ -173,9 +171,8 @@ game.getBanedPosition = color => {
     function reflectAndUpdate() {
       score.forEach((col, ax) => {
         col.forEach((item, ay) => {
-          if (!board[ax][ay] && item > 1){
+          if (!board[ax][ay] && item > 1)
             result.push([ax,ay]);
-          }
         });
         col.fill(0);
       });
@@ -217,7 +214,6 @@ game.getBanedPosition = color => {
               const PX = x + (e + g) * k,
                     PY = y + (e + g) * h;
               score[PX][PY]++;
-              console.log(PX, PY);
             }
           });
         }
@@ -232,8 +228,8 @@ game.getBanedPosition = color => {
 
 //AI의 테스트를 위해, AI vs AI 대결을 시키는 함수.
 game.AIvsAI = async () => {
-  game.stone.reset();
   let i = 0;
+  game.stone.reset();
   while (!game.checkWin()) {
     await new Promise(resolve =>  {
       setTimeout(resolve, 50);
